@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MoodleLoader – Datenschutzerklärung</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f6f7fb;
+        --surface: #ffffff;
+        --border: #e2e4ec;
+        --text: #1c1e26;
+        --text-muted: #565b6b;
+        --accent: #4f6bf0;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #16171d;
+          --surface: #1e2028;
+          --border: #2e303c;
+          --text: #eef0f6;
+          --text-muted: #aab0c0;
+          --accent: #7c93ff;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      #wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .brand-logo {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), #9b6bff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 800;
+        font-size: 18px;
+      }
+      h1 { font-size: 26px; margin: 0; }
+      .updated { color: var(--text-muted); font-size: 13px; margin: 4px 0 32px; }
+      h2 { font-size: 17px; margin: 32px 0 8px; }
+      p, li { color: var(--text); }
+      ul { padding-left: 22px; }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 18px 22px;
+        margin: 18px 0;
+      }
+      code {
+        background: var(--border);
+        padding: 1px 6px;
+        border-radius: 5px;
+        font-size: 0.92em;
+      }
+      a { color: var(--accent); }
+      footer {
+        margin-top: 48px;
+        color: var(--text-muted);
+        font-size: 13px;
+        border-top: 1px solid var(--border);
+        padding-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrap">
+      <div class="brand">
+        <div class="brand-logo">M</div>
+        <h1>MoodleLoader – Datenschutzerklärung</h1>
+      </div>
+      <p class="updated">Stand: 19. Juli 2026</p>
+
+      <p>
+        MoodleLoader ist eine Browser-Erweiterung, die komplette Moodle-Kurse (Dateien, Ordner,
+        Aufgaben-Anhänge, externe Cloud-Freigabe-Links) auf Wunsch der Nutzerin/des Nutzers lokal
+        herunterlädt. Diese Erklärung beschreibt, welche Daten dabei verarbeitet werden.
+      </p>
+
+      <div class="card">
+        <strong>Kurzfassung:</strong> MoodleLoader sammelt, speichert oder überträgt keine
+        persönlichen Daten an den Entwickler oder Dritte. Alle Verarbeitung findet ausschließlich
+        lokal im Browser der Nutzerin/des Nutzers statt.
+      </div>
+
+      <h2>Welche Daten werden verarbeitet?</h2>
+      <ul>
+        <li>
+          <strong>Inhalt der aktuell geöffneten Moodle-Seite</strong> (Kursstruktur, Dateilinks),
+          um die herunterladbaren Elemente zu erkennen. Diese Daten werden nur im Arbeitsspeicher
+          des Browsers verarbeitet und nirgendwohin gesendet.
+        </li>
+        <li>
+          <strong>Download-Verlauf des Browsers</strong> (nur Dateinamen/Pfade, über die
+          Browser-eigene <code>chrome.downloads</code>-API): wird ausgelesen, um zu erkennen, ob
+          eine Datei bereits heruntergeladen wurde (für die Einstellung "Kopie anlegen" /
+          "Überspringen"). Verlässt zu keinem Zeitpunkt den Browser.
+        </li>
+        <li>
+          <strong>Einstellungen</strong> (Downloadordner-Name, Konfliktverhalten, Theme) werden
+          über die Browser-eigene <code>storage</code>-API lokal auf dem Gerät gespeichert
+          (bei aktivierter Chrome-Synchronisierung ggf. verschlüsselt über das eigene
+          Google-Konto synchronisiert – dabei ist ausschließlich Google, nicht der Entwickler von
+          MoodleLoader, beteiligt).
+        </li>
+      </ul>
+
+      <h2>Was passiert NICHT</h2>
+      <ul>
+        <li>Keine Übertragung von Daten an Server des Entwicklers – MoodleLoader betreibt keinerlei eigene Server.</li>
+        <li>Keine Analyse-, Tracking- oder Werbe-Skripte.</li>
+        <li>Kein Verkauf oder Weitergabe von Daten an Dritte.</li>
+        <li>Kein Zugriff auf Passwörter oder Anmeldedaten – MoodleLoader nutzt ausschließlich die bereits bestehende, im Browser vorhandene Anmeldesitzung bei Moodle.</li>
+      </ul>
+
+      <h2>Warum die Berechtigung "Auf allen Websites" nötig ist</h2>
+      <p>
+        Moodle wird von Hochschulen und Unternehmen selbst gehostet und läuft daher auf beliebigen,
+        nicht vorhersagbaren Domains. MoodleLoader prüft bei jedem Seitenaufruf zunächst rein lokal
+        anhand typischer Moodle-Merkmale (bestimmte HTML-Strukturen), ob es sich überhaupt um eine
+        Moodle-Instanz handelt, bevor irgendeine weitere Aktion ausgeführt wird. Auf allen anderen
+        Seiten bleibt die Erweiterung inaktiv.
+      </p>
+
+      <h2>Downloads von Dateien</h2>
+      <p>
+        Heruntergeladene Dateien stammen ausschließlich von der Moodle-Instanz selbst oder von
+        Cloud-Freigabe-Links (z.B. Nextcloud/ownCloud-basierte Dienste wie bwSync&amp;Share), die
+        im jeweiligen Moodle-Kurs bereits hinterlegt sind. MoodleLoader ruft dabei nur Adressen auf,
+        die im Kurs selbst verlinkt sind.
+      </p>
+
+      <h2>Quelloffen</h2>
+      <p>
+        Der vollständige Quellcode ist öffentlich einsehbar unter
+        <a href="https://github.com/CtrlCup/MoodleLoader">github.com/CtrlCup/MoodleLoader</a>.
+      </p>
+
+      <h2>Kontakt</h2>
+      <p>
+        Fragen zu dieser Erklärung: über die
+        <a href="https://github.com/CtrlCup/MoodleLoader/issues">Issues-Seite</a> des Projekts auf GitHub.
+      </p>
+
+      <footer>MoodleLoader – Mit ♥ von Alex programmiert.</footer>
+    </div>
+  </body>
+</html>
