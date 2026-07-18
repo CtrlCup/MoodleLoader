@@ -1,0 +1,23 @@
+{
+  "name": "moodleloader",
+  "description": "Lädt komplette Moodle-Kurse inkl. Dateien, Ordnern, Abgaben und externen Cloud-Links mit einem Klick herunter.",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "build:safari": "wxt build -b safari",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "zip:safari": "wxt zip -b safari",
+    "compile": "tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "wxt": "^0.20.27"
+  }
+}

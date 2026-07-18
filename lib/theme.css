@@ -1,0 +1,139 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-hover: #f0f1f6;
+  --border: #e2e4ec;
+  --text: #1c1e26;
+  --text-muted: #6b7080;
+  --accent: #4f6bf0;
+  --accent-hover: #3d57d6;
+  --accent-contrast: #ffffff;
+  --success: #1f9d55;
+  --danger: #e0483f;
+  --warning: #c98a12;
+  --radius: 10px;
+  --shadow:
+    0 1px 2px rgba(20, 22, 30, 0.06),
+    0 4px 16px rgba(20, 22, 30, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #16171d;
+    --surface: #1e2028;
+    --surface-hover: #262832;
+    --border: #2e303c;
+    --text: #eef0f6;
+    --text-muted: #9498a8;
+    --accent: #7c93ff;
+    --accent-hover: #97a9ff;
+    --accent-contrast: #12141c;
+    --success: #3fc776;
+    --danger: #ef6960;
+    --warning: #e0a83a;
+    --shadow:
+      0 1px 2px rgba(0, 0, 0, 0.3),
+      0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+:root[data-theme='light'] {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-hover: #f0f1f6;
+  --border: #e2e4ec;
+  --text: #1c1e26;
+  --text-muted: #6b7080;
+  --accent: #4f6bf0;
+  --accent-hover: #3d57d6;
+  --accent-contrast: #ffffff;
+}
+
+:root[data-theme='dark'] {
+  --bg: #16171d;
+  --surface: #1e2028;
+  --surface-hover: #262832;
+  --border: #2e303c;
+  --text: #eef0f6;
+  --text-muted: #9498a8;
+  --accent: #7c93ff;
+  --accent-hover: #97a9ff;
+  --accent-contrast: #12141c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.icon-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+
+.btn {
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.subtle {
+  color: var(--text-muted);
+  font-size: 12.5px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}

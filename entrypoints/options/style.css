@@ -1,0 +1,131 @@
+@import '../../lib/theme.css';
+
+#app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.brand-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #9b6bff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+section.card {
+  margin-bottom: 16px;
+  padding: 18px 20px;
+}
+
+h2 {
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+
+p.hint {
+  margin: 4px 0 12px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+input[type='text'] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13.5px;
+}
+
+.radio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.radio-row:hover {
+  background: var(--surface-hover);
+}
+
+.radio-row input {
+  accent-color: var(--accent);
+  margin-top: 3px;
+}
+
+.radio-row .radio-label {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.radio-row .radio-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+select {
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.saved-indicator {
+  font-size: 12px;
+  color: var(--success);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.saved-indicator.visible {
+  opacity: 1;
+}
+
+footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  margin-top: 24px;
+}
