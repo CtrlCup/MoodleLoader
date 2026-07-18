@@ -2,7 +2,7 @@
   "name": "moodleloader",
   "description": "Lädt komplette Moodle-Kurse inkl. Dateien, Ordnern, Abgaben und externen Cloud-Links mit einem Klick herunter.",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

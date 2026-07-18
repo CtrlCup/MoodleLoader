@@ -7,13 +7,16 @@ gleichzeitig).
 
 Verfügbar für **Chrome, Firefox und Safari** (eine gemeinsame Codebasis, gebaut mit [WXT](https://wxt.dev)).
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.1-blue)
 
 ## Funktionen
 
 - **Ein Klick, kompletter Kurs**: Popup-Icon in einem Moodle-Kurs anklicken → "Kurs herunterladen".
 - **Vom Dashboard aus**: Mehrere Kurse auf einmal auswählen und nacheinander herunterladen (läuft im
-  Hintergrund weiter, auch wenn das Popup geschlossen wird oder man den Tab wechselt).
+  Hintergrund weiter, auch wenn das Popup geschlossen wird oder man den Tab wechselt). Jeder Kurs
+  wird dabei kurz in einem eigenen Tab geöffnet, damit auch clientseitig nachladende Kursformate
+  (siehe unten) vollständig erfasst werden.
+- Jederzeit über das ✕-Symbol im Popup abbrechbar.
 - Erfasst Ressourcen (PDF, Office-Dateien, Skripte, ...), Ordner-Aktivitäten, Aufgaben-Anhänge
   (Angaben des Dozenten *und* eigene Abgaben), Foren-Anhänge und Textseiten.
 - Erkennt externe Cloud-Freigabe-Links (Nextcloud/ownCloud-basiert, z.B. bwSync&Share, Sciebo,
@@ -23,13 +26,12 @@ Verfügbar für **Chrome, Firefox und Safari** (eine gemeinsame Codebasis, gebau
 - Konfigurierbares Verhalten bei bereits vorhandenen Dateien: **Ersetzen**, **Kopie anlegen**
   (`Name (01).endung`, `Name (02).endung`, ...) oder **Überspringen**.
 - Modernes UI mit Hell-/Dunkel-/System-Theme.
-- Versionierung ab `0.1.0`.
 
 ## Installation
 
 ### Chrome (und andere Chromium-Browser: Edge, Brave, Opera, Vivaldi, ...)
 
-1. [`moodleloader-0.1.0-chrome.zip`](../../releases/latest) herunterladen und entpacken.
+1. [`moodleloader-0.1.1-chrome.zip`](../../releases/latest) herunterladen und entpacken.
 2. `chrome://extensions` öffnen.
 3. Oben rechts **Entwicklermodus** aktivieren.
 4. **Entpackte Erweiterung laden** klicken und den entpackten Ordner auswählen.
@@ -43,14 +45,14 @@ Verfügbar für **Chrome, Firefox und Safari** (eine gemeinsame Codebasis, gebau
 
 **Temporär (bis zum nächsten Firefox-Neustart):**
 
-1. [`moodleloader-0.1.0-firefox.zip`](../../releases/latest) herunterladen (nicht entpacken).
+1. [`moodleloader-0.1.1-firefox.zip`](../../releases/latest) herunterladen (nicht entpacken).
 2. `about:debugging#/runtime/this-firefox` öffnen.
 3. **Temporäres Add-on laden** klicken und die `.zip`-Datei auswählen.
 
 **Dauerhaft:** Firefox verlangt für dauerhaft installierte Add-ons eine Signierung durch Mozilla
 (auch für private Nutzung, außer bei der Firefox Developer/Nightly-Edition mit deaktivierter
 Signaturprüfung `xpinstall.signatures.required = false` in `about:config`). Alternativ die
-[`moodleloader-0.1.0-sources.zip`](../../releases/latest) bei
+[`moodleloader-0.1.1-sources.zip`](../../releases/latest) bei
 [addons.mozilla.org](https://addons.mozilla.org/developers/) als "Unlisted"-Add-on hochladen und
 signieren lassen, dann die signierte `.xpi`-Datei dauerhaft installieren.
 
@@ -59,10 +61,10 @@ signieren lassen, dann die signierte `.xpi`-Datei dauerhaft installieren.
 Safari-Web-Extensions müssen von Apple über Xcode gebaut/signiert werden – das ist von Windows aus
 nicht möglich. Auf einem Mac:
 
-1. [`moodleloader-0.1.0-safari.zip`](../../releases/latest) herunterladen und entpacken.
+1. [`moodleloader-0.1.1-safari.zip`](../../releases/latest) herunterladen und entpacken.
 2. Im Terminal:
    ```bash
-   xcrun safari-web-extension-converter /pfad/zum/entpackten/moodleloader-0.1.0-safari-Ordner
+   xcrun safari-web-extension-converter /pfad/zum/entpackten/moodleloader-0.1.1-safari-Ordner
    ```
 3. Das dabei erzeugte Xcode-Projekt öffnen und auf **Run** klicken (baut und installiert die
    zugehörige macOS-App samt Extension).
@@ -90,19 +92,22 @@ Innerhalb des Downloadordners wird für jeden Kurs automatisch ein eigener Unter
 Diese Punkte sind bewusste Sicherheitsgrenzen von Browsern bzw. Chrome selbst, keine Bugs:
 
 - **Kein beliebiger Speicherort**: nur Unterordner innerhalb des Downloads-Ordners möglich (siehe oben).
-- **Kachel-Kursformate** (`format_tiles`): Manche Moodle-Kurse laden den Inhalt einer Kachel erst per
-  AJAX nach, sobald sie angeklickt wird. MoodleLoader simuliert diesen Klick automatisch, wenn der
-  Kurs direkt geöffnet ist – bei sehr langsamen Moodle-Instanzen oder bei Download über die
-  Dashboard-Mehrfachauswahl (kein aktiver Tab auf der Kursseite) kann das Nachladen unvollständig
-  bleiben. In dem Fall den Kurs einmal direkt öffnen und erneut herunterladen.
+- **Kachel-Kursformate** (`format_tiles`): Diese Kurse laden den Inhalt einer Kachel erst per AJAX
+  nach echtem Klick nach. MoodleLoader öffnet dafür bei der Dashboard-Mehrfachauswahl jeden Kurs
+  kurz in einem eigenen (sichtbar aufblitzenden) Tab und simuliert dort die Klicks - das ist
+  notwendig, weil Chrome nie fokussierte Hintergrund-Tabs vollständig einfriert (JavaScript pausiert
+  dort komplett), ein einfacher HTTP-Abruf den nachgeladenen Inhalt also nie sähe. Bei sehr großen
+  Kursen kann das ein paar Sekunden pro Kurs dauern.
 - **Externe Links ohne CORS-Freigabe**: Wenn eine Moodle-Verlinkung sofort auf eine fremde Domain
-  weiterleitet, kann JavaScript das Linkziel aus Sicherheitsgründen nicht auslesen. MoodleLoader
-  übergibt in diesem Fall die Moodle-Linkseite direkt an den Download-Manager des Browsers, der die
-  Weiterleitung ausführt – landet man dabei auf einer Webseite statt einer Datei, wird diese Webseite
-  gespeichert.
+  weiterleitet, kann JavaScript das Linkziel im Content-Script nicht auslesen. MoodleLoader löst
+  solche Links im Hintergrund-Skript über eine `webRequest`-Beobachtung auf (das unterliegt nicht
+  denselben CORS-Beschränkungen) - gelingt das ausnahmsweise nicht, wird ersatzweise die
+  Moodle-Linkseite selbst heruntergeladen.
 - **Downloads von unbekannten externen Domains** (z.B. erstmaliger Download von einem
-  Cloud-Anbieter) können von Chrome selbst mit einer Sicherheits-/Speicherort-Abfrage versehen
-  werden – das ist eine Chrome-eigene Schutzfunktion, keine Einstellung von MoodleLoader.
+  Cloud-Anbieter) können von Chrome mit einer eigenen Sicherheits-/Speicherort-Abfrage
+  ("Speichern unter") versehen werden. Das ist Chromes eigener Download-Schutz für Domains ohne
+  Reputationshistorie und lässt sich von keiner Extension per API unterdrücken - betrifft nur
+  externe Cloud-Links, nie normale Moodle-Dateien.
 - **Duplikat-Erkennung** basiert auf dem Download-Verlauf des Browsers. Dateien, die außerhalb des
   Browsers manuell in den Ordner gelegt oder aus dem Verlauf gelöscht wurden, werden nicht erkannt.
 - Unterstützte Moodle-Aktivitätstypen: Ressourcen, Ordner, Aufgaben (Angaben + eigene Abgaben),

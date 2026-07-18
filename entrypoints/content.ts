@@ -2,17 +2,32 @@ import { browser } from 'wxt/browser';
 import { detectPageKind, isMoodleSite, listDashboardCourses, scanCourse } from '../lib/moodle-scraper';
 import type { ContentRequest, DetectResponse, ScanResponse } from '../lib/types';
 
+declare global {
+  interface Window {
+    /**
+     * Für Hintergrund-Tabs (Mehrfach-Kurs-Download vom Dashboard): Chrome kann inaktive
+     * Hintergrund-Tabs "einfrieren", wodurch der runtime.onMessage-Kanal dauerhaft geschlossen
+     * bleibt ("moved into back/forward cache"-Fehler). scripting.executeScript() funktioniert
+     * dagegen auch bei eingefrorenen Tabs zuverlässig, da es nicht auf einen dauerhaften
+     * Message-Port angewiesen ist, sondern den Code direkt zum Aufrufzeitpunkt ausführt.
+     */
+    __moodleLoaderHandleScan?: (saveCourseAsHtml: boolean) => Promise<ScanResponse>;
+  }
+}
+
 export default defineContentScript({
   matches: ['*://*/*'],
   runAt: 'document_idle',
   main() {
+    window.__moodleLoaderHandleScan = handleScan;
+
     browser.runtime.onMessage.addListener((message: ContentRequest, _sender, sendResponse) => {
       if (message.type === 'moodleloader:detect') {
         handleDetect().then(sendResponse);
         return true;
       }
       if (message.type === 'moodleloader:scan') {
-        handleScan(message.saveCourseAsHtml, message.courseUrl).then(sendResponse);
+        handleScan(message.saveCourseAsHtml).then(sendResponse);
         return true;
       }
       return false;
@@ -35,15 +50,9 @@ async function handleDetect(): Promise<DetectResponse> {
   return { isMoodle: true, pageKind };
 }
 
-async function handleScan(saveCourseAsHtml: boolean, courseUrl?: string): Promise<ScanResponse> {
-  if (!courseUrl) {
-    await expandLazySections(document);
-    return scanCourse(document, location.href, { saveCourseAsHtml });
-  }
-  const res = await fetch(courseUrl, { credentials: 'include' });
-  const text = await res.text();
-  const remoteDoc = new DOMParser().parseFromString(text, 'text/html');
-  return scanCourse(remoteDoc, courseUrl, { saveCourseAsHtml });
+async function handleScan(saveCourseAsHtml: boolean): Promise<ScanResponse> {
+  await expandLazySections(document);
+  return scanCourse(document, location.href, { saveCourseAsHtml });
 }
 
 /**

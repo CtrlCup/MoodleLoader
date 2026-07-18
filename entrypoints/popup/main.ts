@@ -209,7 +209,10 @@ function renderDashboard(tabId: number, courses: DashboardCourseLink[]) {
 function renderProgress(state: DownloadRunState) {
   getContent().innerHTML = `
     <div class="card">
-      <div class="course-name" id="progress-label">${escapeHtml(state.courseLabel)}</div>
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:8px;">
+        <div class="course-name" id="progress-label">${escapeHtml(state.courseLabel)}</div>
+        <button class="icon-btn" id="cancel-run" title="Abbrechen">✕</button>
+      </div>
       <div style="height:8px;"></div>
       <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       <div style="height:8px;"></div>
@@ -221,6 +224,11 @@ function renderProgress(state: DownloadRunState) {
     <div class="subtle" style="text-align:center;">Läuft im Hintergrund weiter, auch wenn dieses Fenster geschlossen wird.</div>
   `;
   updateProgressUi(state);
+  document.querySelector<HTMLButtonElement>('#cancel-run')!.addEventListener('click', async () => {
+    const button = document.querySelector<HTMLButtonElement>('#cancel-run')!;
+    button.disabled = true;
+    await browser.runtime.sendMessage({ type: 'moodleloader:cancel' } satisfies BackgroundRequest);
+  });
 }
 
 function updateProgressUi(state: DownloadRunState) {
@@ -245,10 +253,13 @@ function renderSummary(state: DownloadRunState) {
     .join('');
 
   const title = state.totalCourses > 1 ? `${state.totalCourses} Kurse` : state.courseLabel;
+  const heading = state.cancelled
+    ? `<div class="course-name status-warn">⏹ Abgebrochen: ${escapeHtml(title)}</div>`
+    : `<div class="course-name status-ok">✓ Fertig: ${escapeHtml(title)}</div>`;
 
   getContent().innerHTML = `
     <div class="card">
-      <div class="course-name status-ok">✓ Fertig: ${escapeHtml(title)}</div>
+      ${heading}
       <div class="subtle" style="margin-top:6px;">
         ${state.totals.done} heruntergeladen · ${state.totals.skipped} übersprungen
         ${state.totals.failed > 0 ? `· <span class="status-danger">${state.totals.failed} fehlgeschlagen</span>` : ''}
@@ -270,6 +281,7 @@ function startBatchDownload(tabId: number, courses: CourseTarget[], saveCourseAs
     courseLabel: courses.length > 1 ? `(1/${courses.length}) ${courses[0].name}` : courses[0].name,
     fileProgress: { total: 0, done: 0, failed: 0, skipped: 0, finished: false, currentFile: 'Scanne Kursseite ...' },
     finished: false,
+    cancelled: false,
     totals: { done: 0, failed: 0, skipped: 0 },
     warningsByCourse: [],
     updatedAt: Date.now(),

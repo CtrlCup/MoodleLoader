@@ -8,8 +8,8 @@ export default defineConfig({
     name: 'MoodleLoader',
     description:
       'Lädt komplette Moodle-Kurse inkl. Dateien, Ordnern, Abgaben und externen Cloud-Links mit einem Klick herunter.',
-    version: '0.1.0',
-    permissions: ['downloads', 'storage', 'activeTab', 'scripting'],
+    version: '0.1.1',
+    permissions: ['downloads', 'storage', 'activeTab', 'scripting', 'tabs', 'webRequest'],
     // Moodle ist selbst-gehostet und läuft auf beliebigen Domains (Hochschulen, Firmen, ...),
     // daher kann keine feste Host-Liste hinterlegt werden. Der Content-Script prüft selbst,
     // ob die Seite überhaupt eine Moodle-Instanz ist, bevor er aktiv wird.

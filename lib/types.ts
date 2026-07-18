@@ -31,6 +31,7 @@ export interface DiscoveredFile {
     | 'assign-intro'
     | 'assign-submission'
     | 'external-cloud'
+    | 'needs-redirect-resolution'
     | 'course-html';
 }
 
@@ -58,10 +59,12 @@ export interface DownloadProgress {
   finished: boolean;
 }
 
-/** Nachrichten Popup -> Content-Script */
+/** Nachrichten Popup/Background -> Content-Script. Der Scan läuft immer auf dem aktuell
+ * geladenen `document` der Tab-Seite, auf der der Content-Script läuft (siehe lib/tab-scan.ts:
+ * für andere Kurse als den aktiven Tab wird eigens ein Hintergrund-Tab geöffnet). */
 export type ContentRequest =
   | { type: 'moodleloader:detect' }
-  | { type: 'moodleloader:scan'; saveCourseAsHtml: boolean; courseUrl?: string };
+  | { type: 'moodleloader:scan'; saveCourseAsHtml: boolean };
 
 /** Antworten Content-Script -> Popup */
 export interface DetectResponse {
@@ -82,12 +85,14 @@ export interface CourseTarget {
 /** Nachrichten Popup -> Background. Die gesamte Mehrkurs-Orchestrierung läuft im Hintergrund,
  * damit sie unabhängig von der Lebensdauer des Popups weiterläuft (Popups werden vom Browser
  * zerstört, sobald sie den Fokus verlieren). */
-export type BackgroundRequest = {
-  type: 'moodleloader:download-batch';
-  tabId: number;
-  courses: CourseTarget[];
-  saveCourseAsHtml: boolean;
-};
+export type BackgroundRequest =
+  | {
+      type: 'moodleloader:download-batch';
+      tabId: number;
+      courses: CourseTarget[];
+      saveCourseAsHtml: boolean;
+    }
+  | { type: 'moodleloader:cancel' };
 
 /** Broadcast Background -> Popup */
 export interface ProgressMessage {
@@ -102,6 +107,7 @@ export interface DownloadRunState {
   courseLabel: string;
   fileProgress: DownloadProgress;
   finished: boolean;
+  cancelled: boolean;
   totals: { done: number; failed: number; skipped: number };
   warningsByCourse: [string, string[]][];
   updatedAt: number;

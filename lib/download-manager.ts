@@ -1,13 +1,23 @@
 import { browser } from 'wxt/browser';
+import { resolveCloudDownloadUrl } from './cloud-links';
 import { buildDownloadPath, withCopyIndex } from './path-utils';
+import { resolveRedirectTarget } from './redirect-resolver';
 import { getSettings } from './settings';
-import type { CourseTarget, DiscoveredFile, DownloadProgress, DownloadRunState, ScanResponse } from './types';
+import { scanCourse } from './tab-scan';
+import type { CourseTarget, DiscoveredFile, DownloadProgress, DownloadRunState } from './types';
 
 export const ACTIVE_DOWNLOAD_STORAGE_KEY = 'moodleloader:active';
 
 /** Pause zwischen zwei Kursen bei Mehrfach-Downloads, damit Moodle nicht durch viele schnell
  * aufeinanderfolgende Anfragen (Scan + Downloads) blockiert/gedrosselt wird. */
 const DELAY_BETWEEN_COURSES_MS = 1500;
+
+/** Gesetzt, wenn der Nutzer den laufenden Lauf über das X im Popup abbricht. */
+let cancelRequested = false;
+
+export function requestCancel(): void {
+  cancelRequested = true;
+}
 
 /** Prüft anhand des Browser-Download-Verlaufs, ob unter diesem relativen Pfad bereits eine Datei existiert. */
 async function existsInDownloadHistory(relativePath: string): Promise<boolean> {
@@ -62,6 +72,17 @@ async function downloadFile(url: string, filename: string): Promise<void> {
   await browser.downloads.download({ url, filename, conflictAction: 'overwrite' });
 }
 
+/**
+ * Für Links, die per fetch() im Content-Script nicht aufgelöst werden konnten (Redirect auf eine
+ * fremde Domain ohne CORS-Freigabe): hier im Hintergrund per webRequest-Beobachtung auflösen -
+ * das unterliegt nicht denselben CORS-Beschränkungen wie fetch() im Content-Script.
+ */
+async function resolveFileUrl(file: DiscoveredFile): Promise<string> {
+  if (file.source !== 'needs-redirect-resolution') return file.url;
+  const resolved = await resolveRedirectTarget(file.url);
+  return resolveCloudDownloadUrl(resolved);
+}
+
 async function persistState(state: DownloadRunState): Promise<void> {
   try {
     await browser.storage.local.set({ [ACTIVE_DOWNLOAD_STORAGE_KEY]: state });
@@ -83,6 +104,8 @@ async function downloadCourseFiles(
   const settings = await getSettings();
 
   for (const file of files) {
+    if (cancelRequested) break;
+
     fileProgress.currentFile = file.filename;
     await emit();
 
@@ -92,7 +115,8 @@ async function downloadCourseFiles(
       if (resolution.action === 'skip') {
         fileProgress.skipped += 1;
       } else {
-        await downloadFile(file.url, resolution.path);
+        const url = await resolveFileUrl(file);
+        await downloadFile(url, resolution.path);
         fileProgress.done += 1;
       }
     } catch {
@@ -117,12 +141,14 @@ export async function runBatchDownload(
   saveCourseAsHtml: boolean,
   onUpdate: (state: DownloadRunState) => void,
 ): Promise<void> {
+  cancelRequested = false;
   const state: DownloadRunState = {
     courseIndex: 0,
     totalCourses: courses.length,
     courseLabel: '',
     fileProgress: { total: 0, done: 0, failed: 0, skipped: 0, finished: false },
     finished: false,
+    cancelled: false,
     totals: { done: 0, failed: 0, skipped: 0 },
     warningsByCourse: [],
     updatedAt: Date.now(),
@@ -135,18 +161,17 @@ export async function runBatchDownload(
   };
 
   for (let i = 0; i < courses.length; i++) {
+    if (cancelRequested) break;
+
     const course = courses[i];
     state.courseIndex = i + 1;
     state.courseLabel = courses.length > 1 ? `(${i + 1}/${courses.length}) ${course.name}` : course.name;
     state.fileProgress = { total: 0, done: 0, failed: 0, skipped: 0, finished: false, currentFile: 'Scanne Kursseite ...' };
     await emit();
 
-    const scan = (await browser.tabs.sendMessage(tabId, {
-      type: 'moodleloader:scan',
-      saveCourseAsHtml,
-      courseUrl: course.url,
-    })) as ScanResponse;
+    const scan = await scanCourse(course, tabId, saveCourseAsHtml);
     state.warningsByCourse.push([scan.courseName, scan.warnings]);
+    if (cancelRequested) break;
 
     state.fileProgress = { total: scan.files.length, done: 0, failed: 0, skipped: 0, finished: false };
     await emit();
@@ -157,11 +182,13 @@ export async function runBatchDownload(
     state.totals.skipped += state.fileProgress.skipped;
     await emit();
 
+    if (cancelRequested) break;
     if (i < courses.length - 1) {
       await sleep(DELAY_BETWEEN_COURSES_MS);
     }
   }
 
   state.finished = true;
+  state.cancelled = cancelRequested;
   await emit();
 }

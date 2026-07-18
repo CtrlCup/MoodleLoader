@@ -221,15 +221,11 @@ export async function scanCourse(
     }
 
     if (activity.modtype === 'url' && pluginfileLinks.length === 0 && externalLinks.length === 0) {
-      // Der eigentliche Link ließ sich nicht auflösen (typischerweise, weil er auf eine externe
-      // Domain ohne CORS-Freigabe umleitet - aus Sicherheitsgründen kann JavaScript das Ziel eines
-      // fremden Redirects nicht auslesen). Als letzten Ausweg die Moodle-Linkseite selbst zum
-      // Download übergeben: der Download-Manager des Browsers folgt Redirects unabhängig von CORS.
-      addFile(activity.href, activity.name, [activity.sectionName], 'external-cloud');
-      warnings.push(
-        `Hinweis (kein Fehler): "${activity.name}" verlinkt auf eine externe Seite ohne Freigabe für Browser-Erweiterungen. ` +
-          'Der Browser lädt automatisch herunter, was am Ende dieses Links liegt (Datei oder ggf. eine Webseite zum manuellen Öffnen).',
-      );
+      // Der eigentliche Link ließ sich per fetch() nicht auflösen (typischerweise, weil er auf eine
+      // externe Domain ohne CORS-Freigabe umleitet). Wird im Hintergrund-Skript vor dem Download
+      // per webRequest-Beobachtung aufgelöst (siehe lib/redirect-resolver.ts), da das dort nicht
+      // den CORS-Beschränkungen von fetch() unterliegt.
+      addFile(activity.href, activity.name, [activity.sectionName], 'needs-redirect-resolution');
     }
   }
 
