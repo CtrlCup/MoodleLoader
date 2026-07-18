@@ -83,7 +83,7 @@ function render() {
       </select>
     </section>
 
-    <footer>MoodleLoader v0.1.0</footer>
+    <footer>Mit ♥ von Alex programmiert<br />MoodleLoader v0.1.0</footer>
   `;
 
   bind();
