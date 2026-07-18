@@ -1,8 +1,10 @@
+import { browser } from 'wxt/browser';
 import { getSettings, saveSettings } from '../../lib/settings';
 import type { ConflictAction, Settings, Theme } from '../../lib/types';
 import './style.css';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
+const appVersion = browser.runtime.getManifest().version;
 let settings: Settings = await getSettings();
 applyTheme(settings.theme);
 render();
@@ -83,7 +85,7 @@ function render() {
       </select>
     </section>
 
-    <footer>Mit ♥ von Alex programmiert<br />MoodleLoader v0.1.0</footer>
+    <footer>Mit ♥ von Alex programmiert<br />MoodleLoader v${appVersion}</footer>
   `;
 
   bind();

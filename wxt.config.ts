@@ -8,7 +8,8 @@ export default defineConfig({
     name: 'MoodleLoader',
     description:
       'Lädt komplette Moodle-Kurse inkl. Dateien, Ordnern, Abgaben und externen Cloud-Links mit einem Klick herunter.',
-    version: '0.1.1',
+    // Keine eigene `version` hier setzen - WXT übernimmt sie automatisch aus package.json,
+    // damit es nur eine einzige Stelle gibt, an der die Versionsnummer gepflegt wird.
     permissions: ['downloads', 'storage', 'activeTab', 'scripting', 'tabs', 'webRequest'],
     // Moodle ist selbst-gehostet und läuft auf beliebigen Domains (Hochschulen, Firmen, ...),
     // daher kann keine feste Host-Liste hinterlegt werden. Der Content-Script prüft selbst,
