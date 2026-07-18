@@ -7,7 +7,7 @@ gleichzeitig).
 
 Verfügbar für **Chrome, Firefox und Safari** (eine gemeinsame Codebasis, gebaut mit [WXT](https://wxt.dev)).
 
-![Version](https://img.shields.io/badge/version-0.1.1-blue)
+![Version](https://img.shields.io/badge/version-0.1.2-blue)
 
 ## Funktionen
 
@@ -31,7 +31,7 @@ Verfügbar für **Chrome, Firefox und Safari** (eine gemeinsame Codebasis, gebau
 
 ### Chrome (und andere Chromium-Browser: Edge, Brave, Opera, Vivaldi, ...)
 
-1. [`moodleloader-0.1.1-chrome.zip`](../../releases/latest) herunterladen und entpacken.
+1. [`moodleloader-0.1.2-chrome.zip`](../../releases/latest) herunterladen und entpacken.
 2. `chrome://extensions` öffnen.
 3. Oben rechts **Entwicklermodus** aktivieren.
 4. **Entpackte Erweiterung laden** klicken und den entpackten Ordner auswählen.
@@ -45,14 +45,14 @@ Verfügbar für **Chrome, Firefox und Safari** (eine gemeinsame Codebasis, gebau
 
 **Temporär (bis zum nächsten Firefox-Neustart):**
 
-1. [`moodleloader-0.1.1-firefox.zip`](../../releases/latest) herunterladen (nicht entpacken).
+1. [`moodleloader-0.1.2-firefox.zip`](../../releases/latest) herunterladen (nicht entpacken).
 2. `about:debugging#/runtime/this-firefox` öffnen.
 3. **Temporäres Add-on laden** klicken und die `.zip`-Datei auswählen.
 
 **Dauerhaft:** Firefox verlangt für dauerhaft installierte Add-ons eine Signierung durch Mozilla
 (auch für private Nutzung, außer bei der Firefox Developer/Nightly-Edition mit deaktivierter
 Signaturprüfung `xpinstall.signatures.required = false` in `about:config`). Alternativ die
-[`moodleloader-0.1.1-sources.zip`](../../releases/latest) bei
+[`moodleloader-0.1.2-sources.zip`](../../releases/latest) bei
 [addons.mozilla.org](https://addons.mozilla.org/developers/) als "Unlisted"-Add-on hochladen und
 signieren lassen, dann die signierte `.xpi`-Datei dauerhaft installieren.
 
@@ -61,10 +61,10 @@ signieren lassen, dann die signierte `.xpi`-Datei dauerhaft installieren.
 Safari-Web-Extensions müssen von Apple über Xcode gebaut/signiert werden – das ist von Windows aus
 nicht möglich. Auf einem Mac:
 
-1. [`moodleloader-0.1.1-safari.zip`](../../releases/latest) herunterladen und entpacken.
+1. [`moodleloader-0.1.2-safari.zip`](../../releases/latest) herunterladen und entpacken.
 2. Im Terminal:
    ```bash
-   xcrun safari-web-extension-converter /pfad/zum/entpackten/moodleloader-0.1.1-safari-Ordner
+   xcrun safari-web-extension-converter /pfad/zum/entpackten/moodleloader-0.1.2-safari-Ordner
    ```
 3. Das dabei erzeugte Xcode-Projekt öffnen und auf **Run** klicken (baut und installiert die
    zugehörige macOS-App samt Extension).
