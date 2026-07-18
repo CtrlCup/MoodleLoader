@@ -1,7 +1,7 @@
 import { browser } from 'wxt/browser';
 import type { ContentRequest, CourseTarget, ScanResponse } from './types';
 
-function sleep(ms: number): Promise<void> {
+export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
@@ -12,7 +12,7 @@ function sleep(ms: number): Promise<void> {
  * hängen lassen, ganz ohne Fehler. Ein kurz sichtbarer Tab-Wechsel ist der Preis für einen
  * zuverlässigen Scan.
  */
-async function createForegroundTab(url: string): Promise<number> {
+export async function createForegroundTab(url: string): Promise<number> {
   const tab = await browser.tabs.create({ url, active: true });
   if (tab.id == null) {
     throw new Error(`Konnte keinen Tab für "${url}" öffnen.`);
@@ -21,7 +21,7 @@ async function createForegroundTab(url: string): Promise<number> {
 }
 
 /** Wartet, bis ein Tab seine Navigation abgeschlossen hat (Status "complete"). */
-function waitForTabComplete(tabId: number, timeoutMs = 20000): Promise<void> {
+export function waitForTabComplete(tabId: number, timeoutMs = 20000): Promise<void> {
   return new Promise((resolve, reject) => {
     const timeout = setTimeout(() => {
       browser.tabs.onUpdated.removeListener(listener);

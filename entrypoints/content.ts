@@ -12,6 +12,12 @@ declare global {
      * Message-Port angewiesen ist, sondern den Code direkt zum Aufrufzeitpunkt ausführt.
      */
     __moodleLoaderHandleScan?: (saveCourseAsHtml: boolean) => Promise<ScanResponse>;
+    /**
+     * Fallback für Downloads, die über die downloads-API abbrechen (siehe fetchFileAsDataUrl in
+     * lib/download-fallback.ts): holt die Datei stattdessen per fetch() im echten Seitenkontext
+     * (mit vollen Cookies/Headern) und liefert sie als data:-URL zurück.
+     */
+    __moodleLoaderFetchFile?: (url: string) => Promise<string>;
   }
 }
 
@@ -20,6 +26,7 @@ export default defineContentScript({
   runAt: 'document_idle',
   main() {
     window.__moodleLoaderHandleScan = handleScan;
+    window.__moodleLoaderFetchFile = fetchFileAsDataUrl;
 
     browser.runtime.onMessage.addListener((message: ContentRequest, _sender, sendResponse) => {
       if (message.type === 'moodleloader:detect') {
@@ -48,6 +55,20 @@ async function handleDetect(): Promise<DetectResponse> {
     return { isMoodle: true, pageKind, courseName };
   }
   return { isMoodle: true, pageKind };
+}
+
+async function fetchFileAsDataUrl(url: string): Promise<string> {
+  const res = await fetch(url, { credentials: 'include' });
+  const buffer = await res.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  const base64 = btoa(binary);
+  const contentType = res.headers.get('content-type') || 'application/octet-stream';
+  return `data:${contentType};base64,${base64}`;
 }
 
 async function handleScan(saveCourseAsHtml: boolean): Promise<ScanResponse> {

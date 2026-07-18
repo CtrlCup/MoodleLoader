@@ -1,9 +1,10 @@
 import { browser } from 'wxt/browser';
 import { resolveCloudDownloadUrl } from './cloud-links';
+import { fetchFileViaTab } from './download-fallback';
 import { buildDownloadPath, withCopyIndex } from './path-utils';
 import { resolveRedirectTarget } from './redirect-resolver';
 import { getSettings } from './settings';
-import { scanCourse } from './tab-scan';
+import { scanCourse, sleep } from './tab-scan';
 import type { CourseTarget, DiscoveredFile, DownloadProgress, DownloadRunState } from './types';
 
 export const ACTIVE_DOWNLOAD_STORAGE_KEY = 'moodleloader:active';
@@ -68,8 +69,54 @@ async function resolveConflict(
   return { path: relativePath, action: 'download' };
 }
 
+/**
+ * Beobachtet einen laufenden Download und erkennt, ob er "hängen bleibt" (Übertragung bricht
+ * nach einigen KB ab, ohne dass der Browser einen Fehler meldet - trat bei manchen Abgabedateien
+ * auf, siehe fetchFileViaTab). Gilt erst nach fünf aufeinanderfolgenden Messungen ganz ohne neue
+ * Bytes (~5s) als hängen geblieben, um langsame aber tatsächlich noch laufende Downloads (z.B.
+ * große Dateien über eine langsame Verbindung) nicht fälschlich abzubrechen.
+ */
+async function waitForDownloadSettled(downloadId: number, timeoutMs = 20000): Promise<'complete' | 'stalled'> {
+  const start = Date.now();
+  let lastBytes = -1;
+  let stableCount = 0;
+  while (Date.now() - start < timeoutMs) {
+    const [item] = await browser.downloads.search({ id: downloadId });
+    if (!item) return 'stalled';
+    if (item.state === 'complete') {
+      // Manche Server/Proxys schließen die Verbindung vorzeitig, ohne dass Chrome dies als Fehler
+      // wertet - Chrome meldet dann "complete", obwohl weniger Bytes ankamen als per
+      // Content-Length angekündigt. Das erkennen wir hier zusätzlich zum reinen State-Check.
+      if (item.totalBytes > 0 && item.fileSize > 0 && item.fileSize < item.totalBytes) {
+        return 'stalled';
+      }
+      return 'complete';
+    }
+    if (item.state === 'interrupted') return 'stalled';
+    if (item.bytesReceived === lastBytes) {
+      stableCount += 1;
+      if (stableCount >= 5) return 'stalled';
+    } else {
+      stableCount = 0;
+      lastBytes = item.bytesReceived;
+    }
+    await sleep(1000);
+  }
+  return 'stalled';
+}
+
 async function downloadFile(url: string, filename: string): Promise<void> {
-  await browser.downloads.download({ url, filename, conflictAction: 'overwrite' });
+  const downloadId = await browser.downloads.download({ url, filename, conflictAction: 'overwrite' });
+  const outcome = await waitForDownloadSettled(downloadId);
+  if (outcome === 'complete') return;
+
+  // Fallback: manche Downloads brechen über die downloads-API ab (z.B. FILE_FAILED oder
+  // Verbindungsabbruch), obwohl derselbe Abruf per fetch() aus einem echten Seitenkontext heraus
+  // zuverlässig funktioniert. Angebrochenen Download verwerfen und stattdessen über einen Tab neu holen.
+  await browser.downloads.cancel(downloadId).catch(() => {});
+  await browser.downloads.removeFile(downloadId).catch(() => {});
+  const dataUrl = await fetchFileViaTab(url);
+  await browser.downloads.download({ url: dataUrl, filename, conflictAction: 'overwrite' });
 }
 
 /**
@@ -89,10 +136,6 @@ async function persistState(state: DownloadRunState): Promise<void> {
   } catch {
     // Persistenz ist ein reines Komfort-Feature - Downloads laufen auch ohne sie weiter.
   }
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function downloadCourseFiles(

@@ -85,7 +85,7 @@ function render() {
       </select>
     </section>
 
-    <footer>Mit ♥️ von Alex programmiert<br />MoodleLoader v${appVersion}</footer>
+    <footer>Mit ♥️ programmiert von Alex <br />MoodleLoader v${appVersion}</footer>
   `;
 
   bind();
